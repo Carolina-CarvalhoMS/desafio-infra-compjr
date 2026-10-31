@@ -1,15 +1,33 @@
-FROM node:alpine
+# ==========================================
+# Estágio 1: Instalação de Dependências
+# ==========================================
+FROM node:18-alpine AS dependencies
 
-RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
+WORKDIR /app
 
-WORKDIR /usr/src/node-app
+# Copia os manifestos de dependências
+COPY package*.json ./
 
-COPY package.json yarn.lock ./
+# Instala apenas dependências de produção para manter a imagem leve
+RUN npm ci --only=production
 
+# ==========================================
+# Estágio 2: Imagem Final de Produção
+# ==========================================
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copia as dependências do estágio anterior
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY package*.json ./
+COPY src ./src
+
+# Boa prática de segurança: executa como utilizador sem privilégios de root
 USER node
 
-RUN yarn install --pure-lockfile
-
-COPY --chown=node:node . .
-
 EXPOSE 3000
+
+CMD ["node", "src/index.js"]

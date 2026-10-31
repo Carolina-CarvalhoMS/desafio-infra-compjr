@@ -87,9 +87,26 @@
     "husky": "7.0.4",
     "jest": "^26.0.1",
     "lint-staged": "^11.0.0",
+    "mongodb-memory-server": "^8.15.1",
     "node-mocks-http": "^1.8.0",
     "nodemon": "^2.0.0",
     "prettier": "^2.0.5",
     "supertest": "^6.0.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testEnvironmentOptions": {
+      "NODE_ENV": "test"
+    },
+    "restoreMocks": true,
+    "moduleNameMapper": {
+      "^node:(.*)$": "$1"
+    },
+    "coveragePathIgnorePatterns": [
+      "node_modules",
+      "src/config",
+      "src/app.js",
+      "tests"
+    ]
   }
 }
