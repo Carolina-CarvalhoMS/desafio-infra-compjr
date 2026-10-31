@@ -11,9 +11,7 @@ const setupTestDB = () => {
   });
 
   beforeEach(async () => {
-    await Promise.all(
-      Object.values(mongoose.connection.collections).map((collection) => collection.deleteMany())
-    );
+    await Promise.all(Object.values(mongoose.connection.collections).map((collection) => collection.deleteMany()));
   });
 
   afterAll(async () => {
