@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala apenas dependências de produção para manter a imagem leve
-RUN npm ci --only=production
+RUN npm ci --only=production --ignore-scripts
 
 # ==========================================
 # Estágio 2: Imagem Final de Produção
