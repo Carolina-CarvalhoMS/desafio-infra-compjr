@@ -1,0 +1,146 @@
+name: CI/CD Pipeline - Comp Junior Infra
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ----------------------------------------------------
+  # Etapa 1: Lint e Testes Automatizados
+  # ----------------------------------------------------
+  lint-and-tests:
+    name: 1. Lint & Testes com Cobertura
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Instalar Dependências
+        run: npm ci
+
+      - name: Executar Linter
+        run: npm run lint
+
+      - name: Executar Testes com Cobertura
+        run: npm run coverage
+
+      - name: Upload do Relatório de Cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  # ----------------------------------------------------
+  # Etapa 2: Análise de Segredos
+  # ----------------------------------------------------
+  secret-scan:
+    name: 2. Análise de Segredos
+    needs: lint-and-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Executar Gitleaks para detetar segredos
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ----------------------------------------------------
+  # Etapa 3: Análise de Qualidade (SonarQube)
+  # ----------------------------------------------------
+  sonarqube:
+    name: 3. Análise de Qualidade (SonarQube)
+    needs: secret-scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Baixar Relatório de Cobertura
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Análise SonarCloud / SonarQube
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ----------------------------------------------------
+  # Etapa 4: Segurança de Contentores (Trivy Scan)
+  # ----------------------------------------------------
+  container-security:
+    name: 4. Varredura de Segurança da Imagem (Trivy)
+    needs: sonarqube
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Build local da imagem Docker para varredura
+        run: docker build -t app-infra:test .
+
+      - name: Executar Trivy Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app-infra:test'
+          format: 'table'
+          exit-code: '0' # Altere para 1 se desejar falhar o build em caso de vulnerabilidades CRITICAL
+          severity: 'CRITICAL,HIGH'
+
+  # ----------------------------------------------------
+  # Etapa 5: Build e Push da Imagem Docker
+  # ----------------------------------------------------
+  build-and-push:
+    name: 5. Build & Push da Imagem Docker
+    needs: container-security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Autenticar no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build e Push da Imagem Otimizada
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/desafio-infra-compjr:latest
+
+  # ----------------------------------------------------
+  # Etapa 6: Deploy Automatizado no Render
+  # ----------------------------------------------------
+  deploy-render:
+    name: 6. Deploy Automatizado no Render
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Acionar Hook de Deploy no Render
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"

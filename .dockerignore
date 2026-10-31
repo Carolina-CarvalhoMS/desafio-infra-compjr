@@ -4,6 +4,6 @@ coverage
 .git
 .gitignore
 .env
-.env.*
+.env*
 Dockerfile
 README.md
