@@ -13,15 +13,20 @@ jobs:
 
     services:
       mongodb:
-        image: mongo:6.0
+        image: mongo:4.4
         ports:
           - 27017:27017
+        options: >-
+          --health-cmd "mongo --eval 'db.runCommand({ping: 1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     env:
       NODE_ENV: test
       PORT: 3000
       MONGODB_URL: mongodb://127.0.0.1:27017/node-express-boilerplate-test
-      MONGOMS_VERSION: "6.0.14"
+      MONGOMS_VERSION: "4.4.18"
       JWT_SECRET: thisisasamplesecret
       JWT_ACCESS_EXPIRATION_MINUTES: 30
       JWT_REFRESH_EXPIRATION_DAYS: 30
@@ -35,15 +40,7 @@ jobs:
       - name: Instalar dependência de compatibilidade (libssl1.1)
         run: |
           wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-
-      - name: Aguardar porta do MongoDB estar pronta
-        run: |
-          until nc -z 127.0.0.1 27017; do
-            echo "Aguardando banco MongoDB subir..."
-            sleep 1
-          done
-          echo "MongoDB conectado com sucesso na porta 27017!"
+          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb || true
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
