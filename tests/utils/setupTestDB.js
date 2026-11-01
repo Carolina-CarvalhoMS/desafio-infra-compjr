@@ -5,9 +5,21 @@ let mongoServer;
 
 const setupTestDB = () => {
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+    // Se MONGODB_URL estiver definida (ex: no CI/CD), usa o container de MongoDB
+    if (process.env.MONGODB_URL) {
+      await mongoose.connect(process.env.MONGODB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+    } else {
+      // Localmente, se não houver MONGODB_URL, usa o servidor em memória
+      mongoServer = await MongoMemoryServer.create();
+      const mongoUri = mongoServer.getUri();
+      await mongoose.connect(mongoUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+    }
   });
 
   beforeEach(async () => {

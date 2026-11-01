@@ -17,7 +17,7 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
+          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})' --quiet"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -26,7 +26,6 @@ jobs:
       NODE_ENV: test
       PORT: 3000
       MONGODB_URL: mongodb://127.0.0.1:27017/node-express-boilerplate-test
-      MONGOMS_VERSION: '6.0.0'
       JWT_SECRET: thisisasamplesecret
       JWT_ACCESS_EXPIRATION_MINUTES: 30
       JWT_REFRESH_EXPIRATION_DAYS: 30
@@ -50,6 +49,8 @@ jobs:
 
       - name: Executar Testes com Cobertura
         run: npm run coverage
+        env:
+          MONGODB_URL: mongodb://127.0.0.1:27017/node-express-boilerplate-test
 
       - name: Upload de artefato de cobertura
         uses: actions/upload-artifact@v4

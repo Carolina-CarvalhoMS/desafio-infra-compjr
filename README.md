@@ -104,4 +104,3 @@ O Quality Gate funciona como uma trava de qualidade que impede que codigos fora 
 
 5. Acesse a documentacao local no navegador:
    http://localhost:3000/v1/docs/
-
