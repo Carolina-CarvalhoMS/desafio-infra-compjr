@@ -74,6 +74,9 @@
     "winston": "^3.2.1",
     "xss-clean": "^0.1.1"
   },
+  "overrides": {
+    "ws": "^8.17.1"
+  },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",
     "coveralls": "^3.0.7",
