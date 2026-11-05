@@ -75,7 +75,9 @@
     "xss-clean": "^0.1.1"
   },
   "overrides": {
-    "ws": "^8.17.1"
+    "ws": "^8.17.1",
+    "validator": "^13.15.22",
+    "tar": "^6.2.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",
