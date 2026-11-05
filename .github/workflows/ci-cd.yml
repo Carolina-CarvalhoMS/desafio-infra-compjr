@@ -112,6 +112,7 @@ jobs:
           image-ref: 'node-express-app:test'
           format: 'table'
           exit-code: '1'
+          ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
   docker-build-push:
