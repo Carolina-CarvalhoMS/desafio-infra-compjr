@@ -7,21 +7,21 @@ Boilerplate pronto para produção para construção de APIs RESTful usando **No
 
 ---
 
-##  Índice
+## Índice
 
-- [Funcionalidades](#-funcionalidades)
-- [Pré-requisitos](#-pré-requisitos)
-- [Variáveis de Ambiente](#-variáveis-de-ambiente)
-- [Instalação e Execução Local](#-instalação-e-execução-local)
-- [Execução com Docker](#-execução-com-docker)
-- [Estrutura de Testes e Cobertura](#-estrutura-de-testes-e-cobertura)
-- [Esteira de CI/CD](#-esteira-de-cicd)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Licença](#-licença)
+- [Funcionalidades](#funcionalidades)
+- [Pré-requisitos](#pré-requisitos)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Instalação e Execução Local](#instalação-e-execução-local)
+- [Execução Local com Docker Compose](#execução-local-com-docker-compose)
+- [Estrutura de Testes e Cobertura](#estrutura-de-testes-e-cobertura)
+- [Esteira de CI/CD](#esteira-de-cicd)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Licença](#licença)
 
 ---
 
-##  Funcionalidades
+## Funcionalidades
 
 - **Autenticação e Autorização:** JWT tokens, refresh tokens e controle de permissões por papéis (roles).
 - **Banco de Dados:** MongoDB 6.0 com Mongoose ODM.
@@ -37,7 +37,7 @@ Boilerplate pronto para produção para construção de APIs RESTful usando **No
 
 ---
 
-##  Pré-requisitos
+## Pré-requisitos
 
 Certifique-se de ter instalado em seu ambiente:
 
@@ -48,7 +48,7 @@ Certifique-se de ter instalado em seu ambiente:
 
 ---
 
-##  Variáveis de Ambiente
+## Variáveis de Ambiente
 
 Crie um arquivo `.env` na raiz do projeto com base no arquivo `.env.example`:
 
@@ -82,7 +82,7 @@ EMAIL_FROM=suporte@suaapp.com
 
 ---
 
-##  Instalação e Execução Local
+## Instalação e Execução Local
 
 1. **Instalar dependências:**
    ```bash
@@ -106,28 +106,28 @@ EMAIL_FROM=suporte@suaapp.com
 
 ---
 
-##  Execução com Docker
+## Execução Local com Docker Compose
 
-O projeto inclui arquivos Docker configurados para múltiplos ambientes:
+Para subir a aplicação e o banco de dados MongoDB 6.0 em ambiente local containerizado:
 
-### Desenvolvimento
 ```bash
+# Modo de Desenvolvimento (Hot-reload)
 npm run docker:dev
-```
 
-### Produção Local
-```bash
+# Modo de Produção Local
 npm run docker:prod
-```
 
-### Testes em Container
-```bash
+# Execução da Suíte de Testes no Container
 npm run docker:test
 ```
 
+### Serviços Subidos:
+- **Node App:** `http://localhost:3000`
+- **MongoDB 6.0:** `mongodb://localhost:27017/node-express-boilerplate`
+
 ---
 
-##  Estrutura de Testes e Cobertura
+## Estrutura de Testes e Cobertura
 
 Os testes utilizam **Jest** e **Supertest**. A suíte de testes suporta execução conectada a um serviço MongoDB ativo ou em memória localmente.
 
@@ -143,37 +143,37 @@ Os testes utilizam **Jest** e **Supertest**. A suíte de testes suporta execuç�
 
 ---
 
-##  Esteira de CI/CD
+## Esteira de CI/CD
 
 A pipeline de Integração e Entrega Contínua foi implementada com **GitHub Actions** (`.github/workflows/ci-cd.yml`) e é acionada a cada `push` ou `pull_request` na branch `main`.
 
 A esteira é composta por **6 jobs sequenciais**:
 
-1. **1. Lint & Testes com Cobertura:**
+1. **Lint & Testes com Cobertura:**
    - Executa a validação de código com ESLint.
    - Sobe um container de **MongoDB 6.0** como serviço do workflow.
    - Executa a suíte de testes completa com medição de cobertura de código.
    - Gera e armazena o artefato de cobertura.
 
-2. **2. Análise de Segredos (Gitleaks):**
+2. **Análise de Segredos (Gitleaks):**
    - Realiza uma varredura estática em todo o histórico do Git procurando por chaves, senhas ou tokens expostos.
 
-3. **3. Análise de Qualidade (SonarCloud):**
+3. **Análise de Qualidade (SonarCloud):**
    - Integra o relatório de cobertura gerado na etapa 1 e analisa métricas de qualidade, *code smells* e duplicidades no SonarCloud.
 
-4. **4. Varredura de Segurança da Imagem (Trivy):**
-   - Compila a imagem Docker localmente e executa uma varredura por vulnerabilidades conhecidas (CVEs) de severidade `HIGH` e `CRITICAL`.
+4. **Varredura de Segurança da Imagem (Trivy):**
+   - Compila a imagem Docker localmente e executa uma varredura por vulnerabilidades conhecidas (CVEs) de severidade `HIGH` e `CRITICAL` (configurado com `exit-code: 1` para interromper o pipeline caso vulnerabilidades graves sejam detectadas).
 
-5. **5. Build & Push da Imagem Docker:**
+5. **Build & Push da Imagem Docker:**
    - Efetua a compilação final da imagem otimizada para produção.
    - Publica a imagem no repositório do **Docker Hub**.
 
-6. **6. Deploy Automatizado no Render:**
+6. **Deploy Automatizado no Render:**
    - Dispara um *Deploy Webhook* para atualizar o serviço em produção no **Render** com a imagem mais recente.
 
 ---
 
-##  Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
 src/
@@ -191,13 +191,13 @@ src/
 tests/              # Suíte de testes unitários e de integração
 .github/
  └── workflows/
-      └── ci-cd.yml  # Pipeline de CI/CD no GitHub Actions
+     └── ci-cd.yml  # Pipeline de CI/CD no GitHub Actions
 Dockerfile          # Instruções para construção da imagem Docker de produção
 docker-compose.yml  # Orquestração do banco e da aplicação
 ```
 
 ---
 
-##  Licença
+## Licença
 
 Este projeto é distribuído sob a licença [MIT](LICENSE).
