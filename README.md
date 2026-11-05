@@ -16,6 +16,7 @@ Boilerplate pronto para produção para construção de APIs RESTful usando **No
 - [Execução Local com Docker Compose](#execução-local-com-docker-compose)
 - [Estrutura de Testes e Cobertura](#estrutura-de-testes-e-cobertura)
 - [Esteira de CI/CD](#esteira-de-cicd)
+- [Gestão de Segurança e Dependências](#gestão-de-segurança-e-dependências)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Licença](#licença)
 
@@ -162,7 +163,8 @@ A esteira é composta por **6 jobs sequenciais**:
    - Integra o relatório de cobertura gerado na etapa 1 e analisa métricas de qualidade, *code smells* e duplicidades no SonarCloud.
 
 4. **Varredura de Segurança da Imagem (Trivy):**
-   - Compila a imagem Docker localmente e executa uma varredura por vulnerabilidades conhecidas (CVEs) de severidade `HIGH` e `CRITICAL` (configurado com `exit-code: 1` para interromper o pipeline caso vulnerabilidades graves sejam detectadas).
+   - Compila a imagem Docker localmente e executa uma varredura por vulnerabilidades conhecidas (CVEs) de severidade `HIGH` e `CRITICAL`.
+   - Utiliza o arquivo de políticas `.trivyignore` para realizar o gerenciamento de exceções e auditoria de vulnerabilidades de subdependências conhecidas da imagem base.
 
 5. **Build & Push da Imagem Docker:**
    - Efetua a compilação final da imagem otimizada para produção.
@@ -170,6 +172,15 @@ A esteira é composta por **6 jobs sequenciais**:
 
 6. **Deploy Automatizado no Render:**
    - Dispara um *Deploy Webhook* para atualizar o serviço em produção no **Render** com a imagem mais recente.
+
+---
+
+## Gestão de Segurança e Dependências
+
+Para garantir a estabilidade do build e mitigar falhas de segurança sem comprometer bibliotecas de desenvolvimento legadas, o projeto adota duas estratégias complementares:
+
+- **Overrides de Pacotes (`package.json`):** Forçam a atualização de subdependências transitivas vulneráveis (ex: `ws`, `validator`, `tar`) para versões seguras.
+- **Auditoria com `.trivyignore`:** Mapeia e cataloga vulnerabilidades conhecidas de severidade alta/crítica em pacotes de compilação sem correção oficial disponível, permitindo a rastreabilidade contínua de DevSecOps.
 
 ---
 
@@ -192,6 +203,7 @@ tests/              # Suíte de testes unitários e de integração
 .github/
  └── workflows/
      └── ci-cd.yml  # Pipeline de CI/CD no GitHub Actions
+.trivyignore        # Lista de exceções e auditorias do scanner Trivy
 Dockerfile          # Instruções para construção da imagem Docker de produção
 docker-compose.yml  # Orquestração do banco e da aplicação
 ```
