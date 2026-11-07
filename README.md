@@ -5,7 +5,6 @@
 
 Boilerplate pronto para produção para construção de APIs RESTful usando **Node.js**, **Express** e **MongoDB**. O projeto foi atualizado e modernizado com suporte nativo ao **MongoDB 6.0**, **Node.js 18**, containerização otimizada com **Docker** e uma esteira automatizada de **CI/CD no GitHub Actions** com deploy contínuo no **Render**.
 
-//TESTE PARA O DISPARO DA ESTEIRA
 
 ---
 
